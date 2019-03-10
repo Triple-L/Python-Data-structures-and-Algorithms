@@ -1,0 +1,108 @@
+http://www.bkjia.com/Javabc/771817.html
+
+连通区标记是最基本的图像处理算法之一。该算法中，按从左至右、从上至下的顺序，对整幅图像进行扫描，
+通过比较每个前景像素的邻域进行连通区标记，并创建等效标记列表。最后，合并等效标记列表，并再次扫描图像以更新标记。
+算法的优点的是通俗易懂，缺点是需要两次扫描图像，效率不高。
+
+区域生长法利用区域生长的思想，一次生长过程可以标记一整个连通区，
+只需对图像进行一次扫描就能标记出所有连通区。算法描述如下： 
+输入待标记图像bitmap，初始化一个与输入图像同样尺寸的标记矩阵labelmap，
+一个队列queue以及标记计数labelIndex；按从左至右、从上至下的顺序扫描bitmap，
+当扫描到一个未被标记的前景像素p时，labelIndex加1，并在labelmap中标记
+p（相应点的值赋为labelIndex），同时，扫描p的八邻域点，若存在未被标记的前景像素，
+则在labelmap中进行标记，并放入queue中，作为区域生长的种子；当queue不为空时，
+从queue中取出一个生长种子点p1，扫描p1的八邻域点，若存在未被标记过的前景像素，
+则在labelmap中进行标记，并放入queue中；重复3直至queue为空，一个连通区标记完成；
+转到2，直至整幅图像被扫描完毕，得到标记矩阵labelmap和连通区的个数labelIndex。
+
+该算法最坏情况下，将对每个像素点都进行一次八邻域搜索，算法复杂度为O(n)。
+
+
+```
+typedef struct QNode{
+    int data;
+    struct QNode *next;
+}QNode;
+
+typedef struct Queue{
+    struct QNode* first;
+    struct QNode* last;
+}Queue;
+
+void PushQueue(Queue *queue, int data){
+    QNode *p = NULL;
+    p = (QNode*)malloc(sizeof(QNode));
+    p->data = data;
+    if(queue->first == NULL){
+        queue->first = p;
+        queue->last = p;
+        p->next = NULL;
+    }
+    else{
+        p->next = NULL;
+        queue->last->next = p;
+        queue->last = p;
+    }
+}
+
+int PopQueue(Queue *queue){
+    QNode *p = NULL;
+    int data;
+    if(queue->first == NULL){
+        return -1;
+    }
+    p = queue->first;
+    data = p->data;
+    if(queue->first->next == NULL){
+        queue->first = NULL;
+        queue->last = NULL;
+    }
+    else{
+        queue->first = p->next;
+    }
+    free(p);
+    return data;
+}
+
+static int NeighborDirection[8][2] = {{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1},{-1,0},{-1,1}};
+
+void SearchNeighbor(unsigned char *bitmap, int width, int height, int *labelmap, 
+                    int labelIndex, int pixelIndex, Queue *queue){
+    int searchIndex, i, length;
+    labelmap[pixelIndex] = labelIndex;
+    length = width * height;
+    for(i = 0;i < 8;i++){
+        searchIndex = pixelIndex + NeighborDirection[i][0] * width + NeighborDirection[i][1];
+        if(searchIndex > 0 && searchIndex < length && 
+            bitmap[searchIndex] == 255 && labelmap[searchIndex] == 0){
+            labelmap[searchIndex] = labelIndex;
+            PushQueue(queue, searchIndex);
+        }
+    }
+}
+
+int ConnectedComponentLabeling(unsigned char *bitmap, int width, int height, int *labelmap){
+    int cx, cy, index, popIndex, labelIndex = 0;
+    Queue *queue = NULL;
+    queue = (Queue*)malloc(sizeof(Queue));
+    queue->first = NULL;
+        queue->last = NULL;
+    memset(labelmap, 0, width * height);
+    for(cy = 1; cy < height - 1; cy++){
+        for(cx = 1; cx < width - 1; cx++){
+            index = cy * width + cx;
+            if(bitmap[index] == 255 && labelmap[index] == 0){
+                labelIndex++;
+                SearchNeighbor(bitmap, width, height, labelmap, labelIndex, index, queue);
+
+                popIndex = PopQueue(queue);
+                while(popIndex > -1){
+                SearchNeighbor(bitmap, width, height, labelmap, labelIndex, popIndex, queue);
+                    popIndex = PopQueue(queue);
+                }
+            }
+        }
+    }
+    free(queue);
+    return labelIndex;
+}```
