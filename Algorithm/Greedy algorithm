@@ -1,7 +1,15 @@
+#05/15/2019
 Today I encountered a question about array and Greedy algorithm.
 This part of knowledge is quite unfamiliar with me now. So, I'd like to rewiew it from now.
 
-1.
+1.Geedy algorithm is a kind of optimal algorithm, fearured with selecting the max result at each step.
+However,in some situation greedy algoritm does not find the optimal solution once the array with a small number followed a bigger one.
+
+If both of the properties below are true, a greedy algorithm can be used to solve the problem.
+
+Greedy choice property: A global (overall) optimal solution can be reached by choosing the optimal choice at each step.
+Optimal substructure: A problem has an optimal substructure if an optimal solution to the entire problem contains the optimal solutions to the sub-problems.
+
 
 
 
