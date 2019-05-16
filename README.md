@@ -1,5 +1,5 @@
 # Python-Machine-Learning
-2019/03/09/ created for my future Job
+2019/03/09/ created for my future Job, still in progress.
 
 ## Python notes and data structures & algorithms
 * [Link List](https://www.jianshu.com/p/73d56c3d228c)
